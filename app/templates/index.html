@@ -2,11 +2,11 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
-    <h1>你好, {% if name %}{{ name }}!{% else %}陌生人{% endif %}</h1>
-    {{ wtf.quick_form(form) }}
-    {% if search_text %}
-        <h1>你搜索的是“{{ search_text }}”</h1>
-    {% endif %}
-    <p>上次访问时间: {{ moment(current_time).format('LLL') }},
-        （{{ moment(current_time).fromNow(refresh=True) }}）</p>
+    <div class="page-header">
+        {% if current_user.is_authenticated %}
+            <h1>你好,{{ current_user.username }}</h1>
+        {% else %}
+            <h1>你好,不来提个好问题吗?</h1>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -8,7 +8,7 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     MAIL_SUBJECT_PREFIX = os.getenv('MAIL_SUBJECT_PREFIX', u'【Exzhihu】')
-    MAIL_SENDER = os.getenv('MAIL_SENDER', u'Exzhihu')
+    MAIL_SENDER = os.getenv('MAIL_SENDER', u'Exzhihu <example@email.com>')
 
     @staticmethod
     def init_app(app):

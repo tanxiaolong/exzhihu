@@ -9,7 +9,6 @@ from .forms import SearchForm
 from .. import db
 
 
-
 @main.route('/', methods=['GET', 'POST'])
 def index():
     form = SearchForm()
