@@ -41,7 +41,7 @@ def register():
         send_email(user.email, u'确认你的账户', 'auth/email/email.html', user=user, token=token)
         flash(u'注册成功, 一封验证邮件已发往你的邮箱, 请登录邮箱进行确认…')
         return redirect(url_for('auth.login'))
-    return render_template('auth/login.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 
 @auth.route('/confirm/<token>')
