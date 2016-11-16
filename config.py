@@ -17,6 +17,7 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    FLASK_ADMIN = 'skycc716@qq.com'
     MAIL_SERVER = 'smtp.163.com'
     MAIL_PORT = 465
     MAIL_USE_SSL = True

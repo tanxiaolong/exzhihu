@@ -1,16 +1,49 @@
 # coding=utf-8
 
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from . import db, login_manager
+
+
+class Permission:
+    POST = 0x01
+    ANSWER = 0x02
+    COMMENT = 0x04
+    ADMINISTER = 0x80
+
 
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     rolename = db.Column(db.String(64), unique=True)
     users = db.relationship('User', backref='role')
+    default = db.Column(db.Boolean, default=False, index=True)
+    permissions = db.Column(db.Integer)
+    # 权限说明: 用1的位置表示不同的操作权限
+    # 发布问题    0b00000001 (0x01)
+    # 回答问题    0b00000010 (0x02)
+    # 评论答案    0b00000100 (0x04)
+    # 管理员权限   0b10000000 (0x80)
+
+    @staticmethod
+    def insert_roles():
+        roles = {
+            # 用按位或的方式把操作权限转换为不同的角色
+            'User': (Permission.POST |
+                     Permission.ANSWER |
+                     Permission.COMMENT, True),
+            'Administrator': (0xff, False)
+        }
+        for r in roles:
+            role = Role.query.filter_by(rolename=r).first()
+            if role is None:
+                role = Role(rolename=r)
+            role.permissions = roles[r][0]
+            role.default = roles[r][1]
+            db.session.add(role)
+        db.session.commit()
 
     def __repr__(self):
         return '<Role %r>' % self.name
@@ -24,6 +57,9 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128))
     email = db.Column(db.String(128), index=True, unique=True)
     confirmed = db.Column(db.Boolean, default=False)
+    name = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.Text())
 
     @property
     def password(self):
@@ -93,5 +129,32 @@ class User(db.Model, UserMixin):
         db.session.add(self)
         return True
 
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.email == current_app.config['FLASK_ADMIN']:
+                self.role = Role.query.filter_by(permissions=0xff).first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
+
+    def can(self, permissions):
+        # 用按位与的方式验证权限
+        return self.role is not None and (
+            self.role.permissions & permissions) == permissions
+
+    def is_administrator(self):
+        return self.can(Permission.ADMINISTER)
+
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.name
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+
+login_manager.anonymous_user = AnonymousUser
