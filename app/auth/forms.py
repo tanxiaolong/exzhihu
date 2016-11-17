@@ -39,11 +39,13 @@ class ChangePasswordForm(Form):
 
 
 class ResetPasswordRequestForm(Form):
+    # 重置密码第一步
     email = StringField(u'注册邮箱', validators=[Required(), Email()])
     submit = SubmitField(u'找回密码')
 
 
 class ResetPasswordForm(Form):
+    # 重置密码第二步
     email = StringField(u'注册邮箱', validators=[Required(), Email()])
     password = PasswordField(u'新密码', validators=[Required(), EqualTo('password2', message=u'两次密码不相同')])
     password2 = PasswordField(u'确认新密码', validators=[Required()])

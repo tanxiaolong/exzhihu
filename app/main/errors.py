@@ -1,8 +1,11 @@
+# coding=utf-8
+
 from flask import render_template
 from . import main
 
 
 @main.app_errorhandler(404)
+# 蓝图中不能只用errorhandler,要用app_errorhandler代替,否则不能在全局生效
 def page_not_found(e):
     return render_template('404.html'), 404
 

@@ -30,6 +30,7 @@ class EditProfileAdminForm(Form):
         super(EditProfileAdminForm, self).__init__(*args, **kwargs)
         self.role.choices = [(role.id, role.rolename)
                              for role in Role.query.order_by(Role.rolename).all()]
+        # 下拉菜单
         self.user = user
 
     def validate_email(self, field):

@@ -16,6 +16,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             return redirect(request.args.get('next') or url_for('main.index'))
+            # 用户访问login_required的页面时,会跳转到登录页面,跳转前的页面会保存在request的next参数中
         flash(u'邮箱或密码错误')
     return render_template('auth/login.html', form=form)
 
@@ -47,6 +48,7 @@ def register():
 @auth.route('/confirm/<token>')
 @login_required
 def confirm(token):
+    # 确认注册邮箱
     if current_user.confirmed:
         return redirect(url_for('main.index'))
     if current_user.confirm(token):
@@ -58,6 +60,7 @@ def confirm(token):
 
 @auth.before_app_request
 def before_request():
+    # 请求开始前判断当前账户是否已确认邮箱,未确认的话跳到unconfirmed页面
     if current_user.is_authenticated \
             and not current_user.confirmed\
             and request.endpoint[:5] != 'auth.'\

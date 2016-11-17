@@ -69,6 +69,28 @@ class User(db.Model, UserMixin):
     questions = db.relationship('Question', backref='asker', lazy='dynamic')
     answers = db.relationship('Answer', backref='author', lazy='dynamic')
 
+    @staticmethod
+    # 用于生成虚拟用户
+    def generate_fake(count=100):
+        from sqlalchemy.exc import IntegrityError
+        from random import seed
+        import forgery_py
+
+        seed()
+        for i in range(count):
+            u = User(email=forgery_py.internet.email_address(),
+                     username=forgery_py.internet.user_name(),
+                     password=forgery_py.lorem_ipsum.word(),
+                     confirmed=True,
+                     name=forgery_py.name.full_name(),
+                     location=forgery_py.address.city(),
+                     about_me=forgery_py.lorem_ipsum.sentence())
+            db.session.add(u)
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
+
     @property
     def password(self):
         raise AttributeError(u'不能读取密码')
@@ -192,6 +214,26 @@ class Question(db.Model):
     asker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     answers = db.relationship('Answer', backref='question', lazy='dynamic')
 
+    @staticmethod
+    def generate_fake(count=100):
+        # 生成虚拟问题
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            q = Question(title=forgery_py.lorem_ipsum.sentences(randint(1,8)),
+                         body=forgery_py.lorem_ipsum.sentences(randint(0,15)),
+                         timestamp=forgery_py.date.date(True),
+                         asker=u)
+            db.session.add(q)
+            db.session.commit()
+
+    def __repr__(self):
+        return '<Question %r>' % self.id
+
 
 class Answer(db.Model):
     __tablename__ = 'answers'
@@ -200,3 +242,26 @@ class Answer(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
+
+    @staticmethod
+    def generate_fake(count=300):
+        # 生成虚拟回答
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        question_count = Question.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            q = Question.query.offset(randint(0, question_count - 1)).first()
+            a = Answer(body=forgery_py.lorem_ipsum.sentences(randint(3,10)),
+                       timestamp=forgery_py.date.date(True),
+                       question=q,
+                       author=u)
+            db.session.add(a)
+            db.session.commit()
+
+    def __repr__(self):
+        return '<Answer %r>' % self.id
+

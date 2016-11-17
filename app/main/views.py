@@ -1,6 +1,5 @@
 # coding=utf-8
 
-from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, abort, flash
 from flask_login import login_required, current_user, current_app
@@ -13,6 +12,7 @@ from .. import db
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    # 用户登录后可以在首页发布问题, 登录和未登录状态都可以在首页查看所有问题
     form = PostQuestionForm()
     if current_user.can(Permission.POST) and \
             form.validate_on_submit():
@@ -84,6 +84,7 @@ def edit_profile_admin(id):
 
 @main.route('/question/<int:id>', methods=['GET', 'POST'])
 def question(id):
+    # 问题固定链接
     question = Question.query.get_or_404(id)
     form = AnswerForm()
     if form.validate_on_submit():
@@ -95,8 +96,9 @@ def question(id):
         return redirect(url_for('.question', id=question.id, page=-1))
     page = request.args.get('page', 1, type=int)
     if page == -1:
+        # page设为-1是请求评论的最后一页,在看到最后一页时算出需要显示的页数
         page = (question.answers.count() -1)/current_app.config.get('FLASKY_POSTS_PER_PAGE', 10) + 1
-    pagination = question.answers.order_by(Answer.timestamp.asc()).paginate(
+    pagination = question.answers.order_by(Answer.timestamp.desc()).paginate(
         page, per_page=current_app.config.get('FLASKY_POSTS_PER_PAGE', 10), error_out=False)
     answers = pagination.items
     return render_template('question.html', question=question, questions=[question], answers=answers, pagination=pagination, form=form)
@@ -105,6 +107,7 @@ def question(id):
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit(id):
+    # 编辑问题
     question = Question.query.get_or_404(id)
     if current_user != question.asker and not current_user.can(Permission.ADMINISTER):
         abort(403)
