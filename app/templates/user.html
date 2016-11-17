@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Exzhihu - {{ user.username }}的主页{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}">
+    <div class="profile-header">
+    <h1>{{ user.username }}</h1>
+    {% if current_user.is_administrator() %}
+    <p>mailto:<a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+    {% endif %}
+    {% if user.location %}<p>{{ user.location }}</p>{% endif %}
+    {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
+    <p>
+        {% if user == current_user %}
+        <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">编辑资料</a>
+        {% if current_user.is_administrator %}
+            <a class="btn btn-danger" href="{{ url_for('.edit_profile_admin', id=user.id) }}">编辑资料【管理】</a>
+        {% endif %}
+        {% endif %}
+    </p>
+    </div>
+    <h3>{{ user.username }}的问题: </h3><br>
+    {% include '_questions.html' %}
+</div>
+{% endblock %}

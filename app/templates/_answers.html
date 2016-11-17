@@ -1,0 +1,18 @@
+<ul class="comments">
+    {% for answer in answers %}
+    <li class="comment">
+        <div class="comment-thumbnail">
+            <a href="{{ url_for('.user', username=answer.author.username) }}">
+                <img class="img-rounded profile-thumbnail" src="{{ answer.author.gravatar(size=40) }}">
+            </a>
+        </div>
+        <div class="comment-content">
+            <div class="comment-date">{{ moment(answer.timestamp).fromNow() }}</div>
+            <div class="comment-author"><a href="{{ url_for('.user', username=answer.author.username) }}">{{ answer.author.username }}</a></div>
+            <div class="comment-body">
+                    {{ answer.body }}
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

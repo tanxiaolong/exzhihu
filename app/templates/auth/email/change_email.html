@@ -1,0 +1,6 @@
+<p>尊敬的 {{ user.username }}</p>
+<p>请 <a href="{{ url_for('auth.change_email', token=token, _external=True) }}">点击这里</a>确认你的邮箱。</p>
+<p>如果不能自动跳转, 你可以复制以下链接到浏览器访问:</p>
+<p>{{ url_for('auth.change_email', token=token, _external=True) }}</p>
+
+<p><small>Note: 此邮件由系统自动发送, 请勿回复</small></p>
