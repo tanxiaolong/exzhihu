@@ -20,5 +20,14 @@ def test():
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
 
+@manager.command
+def deploy():
+    from flask_migrate import upgrade
+    from app.models import User, Role, Question, Answer
+
+    upgrade()
+
+    Role.insert_roles()
+
 if __name__ == '__main__':
     manager.run()
