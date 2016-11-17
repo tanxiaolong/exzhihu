@@ -9,6 +9,7 @@ class Config(object):
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     MAIL_SUBJECT_PREFIX = os.getenv('MAIL_SUBJECT_PREFIX', u'【Exzhihu】')
     MAIL_SENDER = os.getenv('MAIL_SENDER', u'Exzhihu <example@email.com>')
+    SSL_DISABLE = True
 
     @staticmethod
     def init_app(app):
@@ -43,3 +44,22 @@ config = {
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+
+
+class HerokuConfig(ProductionConfig):
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
+
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+
+        # handle proxy server headers
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app)
+
+        # log to stderr
+        import logging
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
