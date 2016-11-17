@@ -6,8 +6,8 @@ from flask import render_template, request, redirect, url_for, abort, flash
 from flask_login import login_required, current_user, current_app
 from . import main
 from ..decorators import admin_required
-from ..models import User, Role, Permission, Question
-from .forms import EditProfileForm, EditProfileAdminForm, PostQuestionForm
+from ..models import User, Role, Permission, Question, Answer
+from .forms import EditProfileForm, EditProfileAdminForm, PostQuestionForm, AnswerForm
 from .. import db
 
 
@@ -85,7 +85,21 @@ def edit_profile_admin(id):
 @main.route('/question/<int:id>', methods=['GET', 'POST'])
 def question(id):
     question = Question.query.get_or_404(id)
-    return render_template('question.html', question=question, questions=[question])
+    form = AnswerForm()
+    if form.validate_on_submit():
+        answer = Answer(question=question,
+                        body=form.body.data,
+                        author=current_user._get_current_object())
+        db.session.add(answer)
+        flash(u'你的回答已发布')
+        return redirect(url_for('.question', id=question.id, page=-1))
+    page = request.args.get('page', 1, type=int)
+    if page == -1:
+        page = (question.answers.count() -1)/current_app.config.get('FLASKY_POSTS_PER_PAGE', 10) + 1
+    pagination = question.answers.order_by(Answer.timestamp.asc()).paginate(
+        page, per_page=current_app.config.get('FLASKY_POSTS_PER_PAGE', 10), error_out=False)
+    answers = pagination.items
+    return render_template('question.html', question=question, questions=[question], answers=answers, pagination=pagination, form=form)
 
 
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])

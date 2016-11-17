@@ -67,6 +67,7 @@ class User(db.Model, UserMixin):
     about_me = db.Column(db.Text())
     avatar_hash = db.Column(db.String(32))
     questions = db.relationship('Question', backref='asker', lazy='dynamic')
+    answers = db.relationship('Answer', backref='author', lazy='dynamic')
 
     @property
     def password(self):
@@ -189,3 +190,13 @@ class Question(db.Model):
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     asker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    answers = db.relationship('Answer', backref='question', lazy='dynamic')
+
+
+class Answer(db.Model):
+    __tablename__ = 'answers'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))

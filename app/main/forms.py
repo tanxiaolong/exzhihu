@@ -48,3 +48,7 @@ class PostQuestionForm(Form):
     body = TextAreaField(u'问题背景、条件等详细信息（可选）')
     submit = SubmitField(u'发布问题')
 
+
+class AnswerForm(Form):
+    body = StringField('', validators=[Required()])
+    submit = SubmitField(u'发布回答')
