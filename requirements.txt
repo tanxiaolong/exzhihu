@@ -28,3 +28,4 @@ six==1.4.1
 SQLAlchemy==0.9.9
 Werkzeug==0.10.4
 WTForms==1.0.5
+Flask-SSLify==0.1.4
