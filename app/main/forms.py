@@ -6,11 +6,6 @@ from wtforms import ValidationError
 from ..models import User, Role
 
 
-class SearchForm(Form):
-    search_text = TextAreaField(u'搜索你感兴趣的内容…')
-    submit = SubmitField(u'搜索')
-
-
 class EditProfileForm(Form):
     name = StringField(u'真实姓名', validators=[Length(0, 64)])
     location = StringField(u'所在地', validators=[Length(0, 64)])
@@ -46,3 +41,10 @@ class EditProfileAdminForm(Form):
         if field.data != self.user.username and \
                 User.query.filter_by(username=field.data).first():
             raise ValidationError(u'用户名已存在,请重新输入')
+
+
+class PostQuestionForm(Form):
+    title = StringField(u'写下你的问题', validators=[Required(), Length(0, 64)])
+    body = TextAreaField(u'问题背景、条件等详细信息（可选）')
+    submit = SubmitField(u'发布问题')
+

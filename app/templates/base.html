@@ -1,6 +1,12 @@
 {% extends "bootstrap/base.html" %}
 
-{% block title %}简易知乎{% endblock %}
+{% block title %}Exzhihu{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+{% endblock %}
+
 
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">

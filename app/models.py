@@ -1,12 +1,15 @@
 # coding=utf-8
 
 import hashlib
+from datetime import datetime
 from flask import request
 from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from . import db, login_manager
+
+
 
 
 class Permission:
@@ -63,6 +66,7 @@ class User(db.Model, UserMixin):
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
     avatar_hash = db.Column(db.String(32))
+    questions = db.relationship('Question', backref='asker', lazy='dynamic')
 
     @property
     def password(self):
@@ -175,5 +179,13 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
-
 login_manager.anonymous_user = AnonymousUser
+
+
+class Question(db.Model):
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(64))
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    asker_id = db.Column(db.Integer, db.ForeignKey('users.id'))

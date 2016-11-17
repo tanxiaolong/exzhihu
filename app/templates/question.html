@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ question.title }} by {{ question.asker.username }}
+{% endblock %}
+
+{% block page_content %}
+    {% include "_questions.html" %}
+    <div class="post-body">{{ question.body }}</div>
+
+{% endblock %}
